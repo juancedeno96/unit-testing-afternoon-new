@@ -4,7 +4,7 @@
 
 We will be using a completed full stack project to test both pure functions server/client side and React components. This project will use Jest and react-test-library. You will focus on writing tests for functions/Components that already exist with some slight refactoring on the existing codebase. Run the command `npm run dev` to spin up the express server and React project and then familiarize yourself with the functionality.
 
-To keep the number of libraries you need to learn to a minimum, only Jest and react testing library are included in this project. For shallow testing of components, it is highly recommended you research enzyme. It provides a lot of functionality for easily testing React components. This project is intended to be a starting point for your testing knowledge and not an all inclusive resource.
+To keep the number of libraries you need to learn to a minimum, only Jest and react testing library are included in this project. This project is intended to be a starting point for your testing knowledge and not an all inclusive resource.
 
 ## Step 1
 
@@ -24,7 +24,7 @@ Let's get all the setup out of the way to begin testing our utility functions. I
 ### Instructions
 
 - Run the command `npm install --save-dev @testing-library/react` in your terminal.
-  - Note: This is not a required package for testing React components but it provides some utility methods that make testing easier.
+  - Note: This is not a required package for testing React components but it provides some utility methods that make testing easier. <b>It is also installed automatically by the newest versions of create-react-app</b>
 - In the `src` folder create a folder titled `__tests__` and then in that folder create a file called `utilFunctions.test.js`.
   - Jest will automatically detect this folder and run all files inside of it when you run `npm run test`
 - In the `package.json` add this code snippet.
@@ -156,15 +156,15 @@ Now that we have the necessary imports, let's create the first unit test startin
 We will use the `it` method to pass a description of the test and a callback function that Jest will execute to carry out our assertions. Let's then invoke `expect` and pass in `shortenText(shortText)` to get the shortened version of the passed in text string. Since this string has less than 100 characters to begin with, we should expect that the length of the returned string is equal to the initial length of the string (29).
 
 ```js
-it('shortenText should not alter a string with less than 100 characters', () => {
+test('shortenText should not alter a string with less than 100 characters', () => {
   expect(shortenText(shortText)).toHaveLength(29);
 });
 ```
 
-Running this test will pass just like we expect it to. Let's write another test for `shortenText` but this time check if it correctly shortens text that is over 100 characters and adds 3 periods at the end. Since we are going to be testing two things here, lets create a variable called `shortened` that we can save the result of invoking `shortenText(longText)` to. Next, let's create our first assertion and say that we expect the length of `shortened` to not be equal to the length of `longText`. Then, let's write our second assertion as say that we expect `shortened`'s last 3 characters to be equal to `...`.
+Running this test will pass just like we expect it to. Let's write another test for `shortenText` but this time check if it correctly shortens text that is over 100 characters and adds 3 periods at the end. Since we are going to be testing two things here, lets create a variable called `shortened` that we can save the result of invoking `shortenText(longText)` to. Next, let's create our first assertion and say that we expect the length of `shortened` to not be equal to the length of `longText`. Then, let's write our second assertion to say that we expect `shortened`'s last 3 characters to be equal to `...`.
 
 ```js
-it('shortenText should cut off extra characters after 100 and add three periods', () => {
+test('shortenText should cut off extra characters after 100 and add three periods', () => {
   const shortened = shortenText(longText);
   expect(shortened).not.toHaveLength(longText.length);
   expect(shortened.slice(-3)).toBe('...');
@@ -182,17 +182,18 @@ export const shortenText = text => {
 };
 ```
 
-After we make the changes and run `npm run test` again, our test will pass. That is enough testing on that function. Next let's write a few tests to test if the `wordCount` function will correctly sum up the number of words in an array full of posts. Write a test for `wordCount` that will check if the value of invoking it and passing in our test posts array is equal to 233 words.
+After we make the changes and run `npm run test` again, our test will pass. That is enough testing on that function. Next, let's write a few tests to test if the `wordCount` function will correctly sum up the number of words in an array full of posts. Write a test for `wordCount` that will check if the value of invoking it and passing in our test posts array is equal to 233 words.
 
 ```js
-it('wordCount should correctly count the number of words in a sentence', () => {
+test('wordCount should correctly count the number of words in a sentence', () => {
   expect(wordCount(posts)).toBe(233);
 });
 ```
+
 Next, let's write a few tests for `attachUserName`. The first should check to make sure that passing in users and posts will attach a `displayName` property to every post. Let's save the result of invoking `attachUserName` to a variable called `newPosts`. Then we can assert that the first item in the new array has a property called `displayName`.
 
 ```js
-it('attachUserName should correctly attach a users full name to a post', () => {
+test('attachUserName should correctly attach a users full name to a post', () => {
   const newPosts = attachUserName(users, posts);
   expect(newPosts[0]).toHaveProperty('displayName');
 });
@@ -202,15 +203,15 @@ Run `npm run test`. You should see a failing test here. This is because one of o
 
 ```js
 attachUserName(users, posts) {
-    let userDict = users.reduce((a, v) => {
-      a[v.id] = v;
-      return a;
+    let userDict = users.reduce((accum, user) => {
+      accum[user.id] = user;
+      return accum;
     }, {});
     return posts
-      .filter(p => userDict[p.userId])
-      .map(p => {
-        p.displayName = `${userDict[p.userId].first} ${userDict[p.userId].last}`;
-        return p;
+      .filter( post => userDict[post.userId])
+      .map( post => {
+        post.displayName = `${userDict[post.userId].first} ${userDict[post.userId].last}`;
+        return post;
       });
   }
 ```
@@ -218,7 +219,7 @@ attachUserName(users, posts) {
 Lastly, create a test that checks to make sure that the test removes any posts with no matching user. You will want to save `attachUserName(users, posts)` to a new variable `newPosts`. Then you can assert that `newPosts` does not contain the deleted post. There is a helpful matcher that Jest gives us called `.toContainEqual` for this very purpose. It will check an array of objects and see if it can find a matching one.
 
 ```js
-it('attachUserName should remove any post with no matching user', () => {
+test('attachUserName should remove any post with no matching user', () => {
   const newPosts = attachUserName(users, posts);
   const deletedPost = posts[5];
   expect(newPosts).not.toContainEqual(deletedPost);
@@ -238,26 +239,26 @@ import { shortenText } from '../utils/functions';
 import { wordCount, attachUserName } from '../../server/utils';
 import { shortText, longText, posts, users } from './__data__/testData';
 
-it('shortenText should not alter a string with less than 100 characters', () => {
+test('shortenText should not alter a string with less than 100 characters', () => {
   expect(shortenText(shortText)).toHaveLength(29);
 });
 
-it('shortenText should cut off extra characters after 100 and add three periods', () => {
+test('shortenText should cut off extra characters after 100 and add three periods', () => {
   const shortened = shortenText(longText);
   expect(shortened).not.toHaveLength(longText.length);
   expect(shortened.slice(-3)).toBe('...');
 });
 
-it('wordCount should correctly count the number of words in a sentence', () => {
+test('wordCount should correctly count the number of words in a sentence', () => {
   expect(wordCount(posts)).toBe(233);
 });
 
-it('attachUserName should correctly attach a users full name to a post', () => {
+test('attachUserName should correctly attach a users full name to a post', () => {
   const newPosts = attachUserName(users, posts);
   expect(newPosts[0]).toHaveProperty('displayName');
 });
 
-it('attachUserName should remove any post with no matching user', () => {
+test('attachUserName should remove any post with no matching user', () => {
   const newPosts = attachUserName(users, posts);
   const deletedPost = posts[5];
   expect(newPosts).not.toContainEqual(deletedPost);
@@ -288,18 +289,23 @@ export const shortenText = text => {
 ```js
 module.exports = {
   wordCount(posts) {
-    return posts.reduce((a, v) => (a += v.text.split(' ').length), 0);
+    return posts.reduce(
+      (accum, post) => (accum += post.text.split(' ').length),
+      0,
+    );
   },
   attachUserName(users, posts) {
-    let userDict = users.reduce((a, v) => {
-      a[v.id] = v;
-      return a;
+    let userDict = users.reduce((accum, user) => {
+      accum[user.id] = user;
+      return accum;
     }, {});
     return posts
-      .filter(p => userDict[p.userId])
-      .map(p => {
-        p.displayName = `${userDict[p.userId].first} ${userDict[p.userId].last}`;
-        return p;
+      .filter(post => userDict[post.userId])
+      .map(post => {
+        post.displayName = `${userDict[post.userId].first} ${
+          userDict[post.userId].last
+        }`;
+        return post;
       });
   },
 };
@@ -363,7 +369,7 @@ it('Renders out a post widget', async () => {
 });
 ```
 
-Now we'll use the async version of the `act` method to render out our `Post` component and wait for the axios request to resolve from our `spyOn` method. Since the `Post` component is wrapped in the HOC `withRouter` we need to wrap our rendered out `Post` component with the `MemoryRouter` component. This will spoof what `HashRouter`/`BrowserRouter` does for us in the actual DOM. Pass a match param to the `Post` component whose value is an object with a params property whose value is also an object that has one property; postId: 1. This is spoofing the match object that gets passed through to `Post`.
+Now we'll use the async version of the `act` method to render out our `Post` component and wait for the axios request to resolve from our `spyOn` method. Since the `Post` component is wrapped in the HOC `withRouter` we need to wrap our rendered out `Post` component with the `MemoryRouter` component. This will spoof what `HashRouter`/`BrowserRouter` does for us in the actual DOM. Pass a match param to the `Post` component whose value is an object with a params property whose value is also an object that has one property; `postId: 1`. This is spoofing the match object that gets passed through to `Post`.
 
 ```js
 await act(async () => {
@@ -490,7 +496,7 @@ const longPost = posts[0];
 const post = posts[1];
 ```
 
-Since all the setup is done, let's write the first test. The first text can be very basic and should just check that `PostWidget` actually renders out the post that is passed to it. Create an `it` block and then render out `PostWidget` passing through the destructured `post` object. Destructure `container` from the returned result of invoking `render`. Then assert about the container's inner text content that it should contain `post`'s `text` value.
+Since all the setup is done, let's write the first test. The first test can be very basic and should just check that `PostWidget` actually renders out the post that is passed to it. Create an `it` block and then render out `PostWidget` passing through the destructured `post` object. Destructure `container` from the returned result of invoking `render`. Then assert about the container's inner text content that it should contain `post`'s `text` value.
 
 ```js
 it('Renders out a Post', () => {

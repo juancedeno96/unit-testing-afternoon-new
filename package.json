@@ -1,4 +1,9 @@
 {
+  "jest": {
+    "watchPathIgnorePatterns": [
+      "<rootDir>/src/__tests__/__data__"
+    ]
+  },
   "name": "unit-testing-afternoon",
   "version": "0.1.0",
   "private": true,
@@ -40,5 +45,8 @@
     ]
   },
   "proxy": "http://localhost:4000",
-  "main": "./server/index.js"
+  "main": "./server/index.js",
+  "devDependencies": {
+    "@testing-library/react": "^11.2.3"
+  }
 }
